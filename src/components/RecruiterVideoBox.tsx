@@ -13,6 +13,7 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 import recruiterImage from '../assets/images/recruiter_sarah_1790844101068.jpg';
+import { RemotionAvatarPlayer } from './remotion/RemotionAvatarPlayer';
 
 interface RecruiterVideoBoxProps {
   questionText: string;
@@ -136,47 +137,14 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
       {/* Video Canvas Container */}
       <div className="relative aspect-[16/10] w-full bg-slate-900 overflow-hidden select-none">
 
-        {/* Recruiter Face Image — breathing / speaking animation */}
-        <img
-          src={recruiterImage}
-          alt={interviewerName}
-          className={`w-full h-full object-cover transition-all duration-700 ${
-            isSpeakingQuestion ? 'animate-face-speak' : 'animate-face-idle'
-          }`}
-          style={{ transformOrigin: 'center 35%' }}
-          referrerPolicy="no-referrer"
+        {/* Remotion AI Video Animator Player */}
+        <RemotionAvatarPlayer
+          imageSrc={recruiterImage}
+          name={interviewerName}
+          title={interviewerTitle}
+          isSpeaking={isSpeakingQuestion}
+          questionText={questionText}
         />
-
-        {/* Ambient Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-transparent to-black/80 pointer-events-none" />
-
-        {/* Warm skin-tone glow while speaking */}
-        <div
-          className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${
-            isSpeakingQuestion ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            background:
-              'radial-gradient(ellipse 55% 65% at 50% 38%, rgba(255,210,160,0.13) 0%, rgba(255,200,140,0.05) 60%, transparent 100%)',
-          }}
-        />
-
-        {/* Ripple rings centered on face */}
-        {isSpeakingQuestion && (
-          <div
-            className="absolute pointer-events-none"
-            style={{ top: '24%', left: '50%', transform: 'translateX(-50%)' }}
-          >
-            <div
-              className="animate-ripple-ring absolute rounded-full border-2 border-sky-400/60"
-              style={{ width: 88, height: 88, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-            />
-            <div
-              className="animate-ripple-ring-delayed absolute rounded-full border-2 border-sky-300/40"
-              style={{ width: 88, height: 88, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-            />
-          </div>
-        )}
 
         {/* Top Overlay Bar */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-auto">
