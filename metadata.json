@@ -1,0 +1,6 @@
+{
+  "name": "WawancaraAI - AI Job Interview Practice",
+  "description": "Platform latihan simulasi wawancara kerja berbasis kecerdasan buatan terdepan dengan teleprompter real-time, STAR framework tracker, dan evaluasi mendalam.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
