@@ -1,9 +1,7 @@
-import React from 'react';
 import {
   useCurrentFrame,
   useVideoConfig,
   interpolate,
-  Img,
   AbsoluteFill,
 } from 'remotion';
 import mouthUpperImg from '../../assets/images/avatar_mouth_upper.png';
@@ -146,8 +144,10 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
         }}
       >
         {/* Base Avatar Image (Centered AI Recruiter Portrait) */}
-        <Img
+        <img
           src={imageSrc}
+          alt="AI Recruiter Avatar"
+          draggable={false}
           className="w-full h-full object-cover"
           style={{
             objectPosition: 'center 32%',
@@ -246,8 +246,10 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
                 />
               )}
               {/* Teeth Texture */}
-              <Img
+              <img
                 src={mouthInteriorImg}
+                alt="Teeth"
+                draggable={false}
                 className="w-full h-full object-contain pointer-events-none"
                 style={{
                   filter: 'contrast(1.02)',
@@ -266,8 +268,10 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
                 transition: 'transform 0.03s linear',
               }}
             >
-              <Img
+              <img
                 src={mouthLowerImg}
+                alt="Lower Lip"
+                draggable={false}
                 className="w-full h-full object-contain pointer-events-none"
               />
             </div>
@@ -283,8 +287,10 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
                 transition: 'transform 0.03s linear',
               }}
             >
-              <Img
+              <img
                 src={mouthUpperImg}
+                alt="Upper Lip"
+                draggable={false}
                 className="w-full h-full object-contain pointer-events-none"
               />
             </div>
