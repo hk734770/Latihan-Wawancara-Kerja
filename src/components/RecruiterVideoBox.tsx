@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import recruiterImage from '../assets/images/recruiter_avatar_sarah.jpg';
 import interview1Video from '../assets/videos/interview-1.mp4';
+import interview2Video from '../assets/videos/interview-2.mp4';
 import { RemotionAvatarPlayer } from './remotion/RemotionAvatarPlayer';
 
 interface RecruiterVideoBoxProps {
@@ -27,6 +28,12 @@ interface RecruiterVideoBoxProps {
   onOpenSettings: () => void;
   videoUrl?: string;
 }
+
+// Map of relative/public URLs to bundled Vite assets for instant fallback
+const VIDEO_ASSET_MAP: Record<string, string> = {
+  '/interview-1.mp4': interview1Video,
+  '/interview-2.mp4': interview2Video,
+};
 
 export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
   questionText,
@@ -47,8 +54,8 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Active video source from prop, fallback to bundled video if available
-  const activeVideoSrc = videoUrl || (interviewerName === 'Sarah Wicaksono' ? interview1Video : undefined);
+  // Active video source from prop or mapped bundle
+  const activeVideoSrc = videoUrl ? (VIDEO_ASSET_MAP[videoUrl] || videoUrl) : undefined;
 
   // Increment recording timer
   useEffect(() => {
@@ -129,6 +136,7 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
     if (activeVideoSrc && interviewerVideoRef.current) {
       interviewerVideoRef.current.currentTime = 0;
       interviewerVideoRef.current.muted = isMuted;
+      interviewerVideoRef.current.load();
       const playPromise = interviewerVideoRef.current.play();
       if (playPromise !== undefined) {
         playPromise

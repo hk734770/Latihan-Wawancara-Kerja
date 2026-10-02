@@ -79,6 +79,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     totalQuestions: 20,
     role: 'Lead Product Manager',
     code: '#PM-892',
+    videoUrl: '/interview-2.mp4',
     questionText:
       'Bisa ceritakan latar belakang profesional Anda dan apa pencapaian produk terbesar yang pernah Anda pimpin sejauh ini?',
     category: 'Behavioral',
