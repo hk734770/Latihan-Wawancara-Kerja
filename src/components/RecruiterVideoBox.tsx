@@ -12,7 +12,7 @@ import {
   Zap,
   User as UserIcon,
 } from 'lucide-react';
-import recruiterImage from '../assets/images/recruiter_sarah_1790844101068.jpg';
+import recruiterImage from '../assets/images/recruiter_avatar_sarah.jpg';
 import { RemotionAvatarPlayer } from './remotion/RemotionAvatarPlayer';
 
 interface RecruiterVideoBoxProps {

@@ -6,9 +6,9 @@ import {
   Img,
   AbsoluteFill,
 } from 'remotion';
-import mouthUpperImg from '../../assets/images/mouth_upper.png';
-import mouthLowerImg from '../../assets/images/mouth_lower.png';
-import mouthInteriorImg from '../../assets/images/mouth_interior.png';
+import mouthUpperImg from '../../assets/images/avatar_mouth_upper.png';
+import mouthLowerImg from '../../assets/images/avatar_mouth_lower.png';
+import mouthInteriorImg from '../../assets/images/avatar_mouth_interior.png';
 
 export interface AvatarSpeakingProps {
   imageSrc: string;
@@ -26,16 +26,16 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
   const { fps } = useVideoConfig();
 
   // ==========================================================================
-  // 1. NATURAL BREATHING & HEAD MOTION (ANCHORED AT SARAH'S NECK: 61.5%, 38%)
+  // 1. NATURAL BREATHING & HEAD MOTION (CENTERED AT AVATAR NECK: 49.0%, 48.0%)
   // ==========================================================================
   const idleBreathingY = Math.sin(frame * 0.055) * 2.2;
   const idleBreathingScale = 1 + Math.sin(frame * 0.055) * 0.003;
 
   // Conversational head nod, tilt, and sway when speaking
-  const speakNodY = Math.sin(frame * 0.26) * 3.2 + Math.sin(frame * 0.13) * 1.5;
-  const speakSwayX = Math.cos(frame * 0.09) * 2.0;
-  const speakTilt = Math.sin(frame * 0.12) * 0.85;
-  const speakScale = 1.015 + Math.abs(Math.sin(frame * 0.16)) * 0.008;
+  const speakNodY = Math.sin(frame * 0.26) * 3.0 + Math.sin(frame * 0.13) * 1.4;
+  const speakSwayX = Math.cos(frame * 0.09) * 1.8;
+  const speakTilt = Math.sin(frame * 0.12) * 0.75;
+  const speakScale = 1.012 + Math.abs(Math.sin(frame * 0.16)) * 0.007;
 
   const currentY = isSpeaking ? idleBreathingY + speakNodY : idleBreathingY;
   const currentX = isSpeaking ? speakSwayX : 0;
@@ -43,11 +43,11 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
   const currentTilt = isSpeaking ? speakTilt : 0;
 
   // ==========================================================================
-  // 2. REALISTIC EYE BLINKING (ANCHORED EXACTLY AT SARAH'S EYES: 61.0%, 26.8%)
+  // 2. REALISTIC EYE BLINKING (CENTERED AT AVATAR EYES: 48.8%, 30.3%)
   // ==========================================================================
   const blinkCycle = frame % 105;
   const isBlinking = blinkCycle >= 100 && blinkCycle <= 103;
-  const blinkOpacity = isBlinking ? 0.85 : 0;
+  const blinkOpacity = isBlinking ? 0.88 : 0;
 
   // ==========================================================================
   // 3. NATURAL DUAL-LIP CADENCE (UPPER & LOWER LIP ARTICULATION)
@@ -75,27 +75,27 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
   const lipSpread = isSpeaking
     ? Math.sin(frame * 0.3 + 0.3) * 0.25 + Math.sin(frame * 0.8) * 0.15
     : 0;
-  const lipWidthScale = 1 + lipSpread * 0.05;
+  const lipWidthScale = 1 + lipSpread * 0.04;
 
   // --------------------------------------------------------------------------
   // BIBIR ATAS (UPPER LIP) DYNAMICS:
   // Subtly elevates on open vowels and depresses on closed consonants (M, B, P)
   // --------------------------------------------------------------------------
   const upperLipY = isSpeaking
-    ? interpolate(mouthOpen, [0, 0.4, 1], [2.2, 0.4, -2.4]) + Math.sin(frame * 0.9) * 0.4
+    ? interpolate(mouthOpen, [0, 0.4, 1], [1.8, 0.3, -2.2]) + Math.sin(frame * 0.9) * 0.3
     : 0;
 
   // --------------------------------------------------------------------------
   // BIBIR BAWAH (LOWER LIP) DYNAMICS:
-  // Primary articulator: moves UP (-12px) to meet upper lip on closures (M, P, B),
+  // Primary articulator: moves UP (-10px) to meet upper lip on closures (M, P, B),
   // and moves DOWN (+5px) to open the oral cavity on open vowels (A, O, U)
   // --------------------------------------------------------------------------
   const lowerLipY = isSpeaking
-    ? interpolate(mouthOpen, [0, 0.35, 1], [-13.5, -4.2, 5.2])
+    ? interpolate(mouthOpen, [0, 0.35, 1], [-11.0, -3.5, 4.8])
     : 0;
 
   // Teeth micro-shift
-  const teethY = isSpeaking ? interpolate(mouthOpen, [0, 1], [-0.5, 0.8]) : 0;
+  const teethY = isSpeaking ? interpolate(mouthOpen, [0, 1], [-0.4, 0.6]) : 0;
 
   // ==========================================================================
   // 4. ACOUSTIC SOUNDWAVE RINGS
@@ -119,14 +119,14 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
         }}
       />
 
-      {/* Dynamic Backlight Halo behind Avatar (Aligned behind Sarah at 61.5%) */}
+      {/* Dynamic Backlight Halo behind Avatar (Aligned centered behind Sarah at 50%) */}
       <div
         className="absolute transition-opacity duration-300 pointer-events-none"
         style={{
           top: '25%',
-          left: '61.5%',
-          width: '520px',
-          height: '520px',
+          left: '50.0%',
+          width: '540px',
+          height: '540px',
           transform: 'translate(-50%, -20%)',
           borderRadius: '50%',
           background: isSpeaking
@@ -141,11 +141,11 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
         style={{
           transform: `translate3d(${currentX}px, ${currentY}px, 0px) scale(${currentScale}) rotate(${currentTilt}deg)`,
-          transformOrigin: '61.5% 38%',
+          transformOrigin: '49.0% 48.0%',
           willChange: 'transform',
         }}
       >
-        {/* Base Avatar Image */}
+        {/* Base Avatar Image (Centered AI Recruiter Portrait) */}
         <Img
           src={imageSrc}
           className="w-full h-full object-cover"
@@ -160,8 +160,8 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
           <div
             className="absolute pointer-events-none"
             style={{
-              top: '37.1%',
-              left: '62.0%',
+              top: '45.0%',
+              left: '49.4%',
               transform: 'translate(-50%, -50%)',
             }}
           >
@@ -188,17 +188,17 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
           </div>
         )}
 
-        {/* Eye Blink Shadow Overlay (Anchored on Sarah's eyes at 61.0%, 26.8%) */}
+        {/* Eye Blink Shadow Overlay (Anchored on Sarah's eyes at 48.8%, 30.3%) */}
         <div
           className="absolute pointer-events-none"
           style={{
-            top: '26.8%',
-            left: '61.0%',
+            top: '30.3%',
+            left: '48.8%',
             transform: 'translate(-50%, -50%)',
-            width: '98px',
+            width: '108px',
             height: '14px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(38, 24, 18, 0.88)',
+            backgroundColor: 'rgba(38, 24, 18, 0.90)',
             opacity: blinkOpacity,
             filter: 'blur(2.2px)',
             transition: 'opacity 0.05s ease-out',
@@ -207,16 +207,16 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
 
         {/* ================================================================== */}
         {/* REALISTIC DUAL-LIP SPEAKING ARTICULATOR (UPPER & LOWER LIPS)       */}
-        {/* Uses high-resolution photographic textures of Sarah's actual lips  */}
+        {/* Perfectly aligned over centered Sarah avatar lips                  */}
         {/* ================================================================== */}
         {isSpeaking && (
           <div
             className="absolute pointer-events-none"
             style={{
-              left: '56.67%',
-              top: '31.9%',
-              width: '145.83px',
-              height: '93.75px',
+              left: '42.84%',
+              top: '40.36%',
+              width: '166.67px',
+              height: '104.16px',
               transformOrigin: '50% 36%',
               transform: `scaleX(${lipWidthScale})`,
               willChange: 'transform',
@@ -297,7 +297,7 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'radial-gradient(ellipse 45% 50% at 61.5% 36%, rgba(254, 215, 170, 0.10) 0%, rgba(253, 186, 116, 0.02) 50%, transparent 75%)',
+                'radial-gradient(ellipse 45% 50% at 49.4% 44%, rgba(254, 215, 170, 0.10) 0%, rgba(253, 186, 116, 0.02) 50%, transparent 75%)',
             }}
           />
         )}
@@ -321,7 +321,7 @@ export const AvatarSpeakingComposition: React.FC<AvatarSpeakingProps> = ({
             }`}
           />
           <span>
-            {isSpeaking ? 'AI DUAL-LIP ARTICULATOR • AKTIF' : `REMOTION AVATAR • ${fps}FPS`}
+            {isSpeaking ? 'AI DUAL-LIP AVATAR • SPEAKING' : `REMOTION AVATAR • ${fps}FPS`}
           </span>
         </div>
       </div>
