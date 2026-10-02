@@ -122,6 +122,15 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
     };
   }, [questionText]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleToggleSpeaking = useCallback(() => {
+    if (isSpeakingQuestion) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      setIsSpeakingQuestion(false);
+    } else {
+      speakQuestion(questionText, isMuted);
+    }
+  }, [isSpeakingQuestion, questionText, isMuted, speakQuestion]);
+
   const handleReplayVoice = () => {
     speakQuestion(questionText, isMuted);
   };
@@ -135,8 +144,11 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
   return (
     <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-md border border-slate-800 flex flex-col">
       {/* Video Canvas Container */}
-      <div className="relative aspect-[16/10] w-full bg-slate-900 overflow-hidden select-none">
-
+      <div 
+        onClick={handleToggleSpeaking}
+        className="relative aspect-[16/10] w-full bg-slate-900 overflow-hidden select-none cursor-pointer group"
+        title="Klik video untuk memutar / menghentikan suara & animasi mulut pewawancara"
+      >
         {/* Remotion AI Video Animator Player */}
         <RemotionAvatarPlayer
           imageSrc={recruiterImage}
@@ -311,18 +323,18 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
             <span>{isCaptionsActive ? 'CC Aktif' : 'CC Nonaktif'}</span>
           </button>
 
-          {/* Replay Voice */}
+          {/* Replay Voice & Mouth Lip-Sync Toggle */}
           <button
-            onClick={handleReplayVoice}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${
+            onClick={handleToggleSpeaking}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all shadow-sm ${
               isSpeakingQuestion
-                ? 'bg-sky-600 text-white border-sky-500'
-                : 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white border-sky-400 ring-2 ring-sky-500/30'
+                : 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800 hover:text-white'
             }`}
-            title="Dengarkan kembali pertanyaan pewawancara"
+            title="Dengarkan suara & lihat animasi gerakan mulut pewawancara"
           >
-            <Volume2 className={`w-3.5 h-3.5 ${isSpeakingQuestion ? 'animate-pulse' : ''}`} />
-            <span>{isSpeakingQuestion ? 'Memutar...' : 'Ulangi Suara'}</span>
+            <Volume2 className={`w-3.5 h-3.5 ${isSpeakingQuestion ? 'animate-bounce text-sky-200' : 'text-sky-400'}`} />
+            <span>{isSpeakingQuestion ? 'Sedang Bicara...' : 'Mulai Bicara (Tes Mulut)'}</span>
           </button>
 
           {/* Mute Interviewer Audio */}
