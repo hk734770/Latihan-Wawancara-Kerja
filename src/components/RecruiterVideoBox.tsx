@@ -11,8 +11,11 @@ import {
   Grid,
   Zap,
   User as UserIcon,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
 import recruiterImage from '../assets/images/recruiter_avatar_sarah.jpg';
+import interview1Video from '../assets/videos/interview-1.mp4';
 import { RemotionAvatarPlayer } from './remotion/RemotionAvatarPlayer';
 
 interface RecruiterVideoBoxProps {
@@ -22,6 +25,7 @@ interface RecruiterVideoBoxProps {
   isMicActive: boolean;
   onToggleMic: () => void;
   onOpenSettings: () => void;
+  videoUrl?: string;
 }
 
 export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
@@ -31,6 +35,7 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
   isMicActive,
   onToggleMic,
   onOpenSettings,
+  videoUrl,
 }) => {
   const [isVideoActive, setIsVideoActive] = useState(true);
   const [isCaptionsActive, setIsCaptionsActive] = useState(true);
@@ -38,8 +43,12 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
   const [isMuted, setIsMuted] = useState(false);
   const [recTime, setRecTime] = useState('08:46');
   const candidateVideoRef = useRef<HTMLVideoElement | null>(null);
+  const interviewerVideoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Active video source from prop, fallback to bundled video if available
+  const activeVideoSrc = videoUrl || (interviewerName === 'Sarah Wicaksono' ? interview1Video : undefined);
 
   // Increment recording timer
   useEffect(() => {
@@ -80,7 +89,14 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
     };
   }, [isVideoActive]);
 
-  // Core speak function
+  // Synchronize mute state with HTML5 interviewer video
+  useEffect(() => {
+    if (interviewerVideoRef.current) {
+      interviewerVideoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  // Core speak function for TTS fallback
   const speakQuestion = useCallback((text: string, muted: boolean) => {
     if (!('speechSynthesis' in window)) {
       setIsSpeakingQuestion(true);
@@ -90,7 +106,6 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
     }
     window.speechSynthesis.cancel();
     if (muted) {
-      // Animation only, no audio
       setIsSpeakingQuestion(true);
       const wordCount = text.trim().split(/\s+/).length;
       const durationMs = Math.max(3000, wordCount * 380);
@@ -109,8 +124,27 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  // Auto-speak when question text changes
+  // Auto-play video or auto-speak question when question changes
   useEffect(() => {
+    if (activeVideoSrc && interviewerVideoRef.current) {
+      interviewerVideoRef.current.currentTime = 0;
+      interviewerVideoRef.current.muted = isMuted;
+      const playPromise = interviewerVideoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsSpeakingQuestion(true))
+          .catch(() => {
+            // Autoplay with audio might require first user gesture
+            setIsSpeakingQuestion(false);
+          });
+      }
+      return () => {
+        if (interviewerVideoRef.current) {
+          interviewerVideoRef.current.pause();
+        }
+      };
+    }
+
     if (!questionText) return;
     const timer = setTimeout(() => {
       speakQuestion(questionText, isMuted);
@@ -120,25 +154,56 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       setIsSpeakingQuestion(false);
     };
-  }, [questionText]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [questionText, activeVideoSrc]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleToggleSpeaking = useCallback(() => {
+    if (activeVideoSrc && interviewerVideoRef.current) {
+      if (interviewerVideoRef.current.paused || interviewerVideoRef.current.ended) {
+        if (interviewerVideoRef.current.ended) {
+          interviewerVideoRef.current.currentTime = 0;
+        }
+        interviewerVideoRef.current.muted = isMuted;
+        interviewerVideoRef.current
+          .play()
+          .then(() => setIsSpeakingQuestion(true))
+          .catch((err) => console.warn('Video play prevented:', err));
+      } else {
+        interviewerVideoRef.current.pause();
+        setIsSpeakingQuestion(false);
+      }
+      return;
+    }
+
     if (isSpeakingQuestion) {
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       setIsSpeakingQuestion(false);
     } else {
       speakQuestion(questionText, isMuted);
     }
-  }, [isSpeakingQuestion, questionText, isMuted, speakQuestion]);
+  }, [activeVideoSrc, isSpeakingQuestion, questionText, isMuted, speakQuestion]);
 
   const handleReplayVoice = () => {
+    if (activeVideoSrc && interviewerVideoRef.current) {
+      interviewerVideoRef.current.currentTime = 0;
+      interviewerVideoRef.current.muted = isMuted;
+      interviewerVideoRef.current
+        .play()
+        .then(() => setIsSpeakingQuestion(true))
+        .catch((err) => console.warn('Video play prevented:', err));
+      return;
+    }
     speakQuestion(questionText, isMuted);
   };
 
   const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    if (activeVideoSrc && interviewerVideoRef.current) {
+      interviewerVideoRef.current.muted = nextMuted;
+      return;
+    }
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     setIsSpeakingQuestion(false);
-    setIsMuted((prev) => !prev);
   };
 
   return (
@@ -147,16 +212,41 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
       <div 
         onClick={handleToggleSpeaking}
         className="relative aspect-[16/10] w-full bg-slate-900 overflow-hidden select-none cursor-pointer group"
-        title="Klik video untuk memutar / menghentikan suara & animasi mulut pewawancara"
+        title="Klik video untuk memutar / menjeda suara & video pewawancara"
       >
-        {/* Remotion AI Video Animator Player */}
-        <RemotionAvatarPlayer
-          imageSrc={recruiterImage}
-          name={interviewerName}
-          title={interviewerTitle}
-          isSpeaking={isSpeakingQuestion}
-          questionText={questionText}
-        />
+        {activeVideoSrc ? (
+          /* Real Video Interview with Synchronized Indonesian Voice & Lip Movement */
+          <video
+            ref={interviewerVideoRef}
+            src={activeVideoSrc}
+            playsInline
+            preload="auto"
+            muted={isMuted}
+            className="w-full h-full object-cover"
+            onPlay={() => setIsSpeakingQuestion(true)}
+            onPause={() => setIsSpeakingQuestion(false)}
+            onEnded={() => setIsSpeakingQuestion(false)}
+          />
+        ) : (
+          /* Remotion AI Video Animator Player fallback */
+          <RemotionAvatarPlayer
+            imageSrc={recruiterImage}
+            name={interviewerName}
+            title={interviewerTitle}
+            isSpeaking={isSpeakingQuestion}
+            questionText={questionText}
+          />
+        )}
+
+        {/* Center Play Button Overlay when paused */}
+        {activeVideoSrc && !isSpeakingQuestion && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[1px] transition-all group-hover:bg-black/50 pointer-events-none">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-sky-600/90 hover:bg-sky-500 text-white font-semibold text-xs sm:text-sm shadow-2xl border border-sky-400/40 transform transition group-hover:scale-105">
+              <Play className="w-4 h-4 fill-white text-white" />
+              <span>Putar Video Pertanyaan</span>
+            </div>
+          </div>
+        )}
 
         {/* Top Overlay Bar */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-auto">
@@ -323,7 +413,7 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
             <span>{isCaptionsActive ? 'CC Aktif' : 'CC Nonaktif'}</span>
           </button>
 
-          {/* Replay Voice & Mouth Lip-Sync Toggle */}
+          {/* Replay Voice / Video Toggle */}
           <button
             onClick={handleToggleSpeaking}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium transition-all shadow-sm ${
@@ -331,11 +421,29 @@ export const RecruiterVideoBox: React.FC<RecruiterVideoBoxProps> = ({
                 ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white border-sky-400 ring-2 ring-sky-500/30'
                 : 'bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800 hover:text-white'
             }`}
-            title="Dengarkan suara & lihat animasi gerakan mulut pewawancara"
+            title="Dengarkan suara & putar video pewawancara"
           >
             <Volume2 className={`w-3.5 h-3.5 ${isSpeakingQuestion ? 'animate-bounce text-sky-200' : 'text-sky-400'}`} />
-            <span>{isSpeakingQuestion ? 'Sedang Bicara...' : 'Mulai Bicara (Tes Mulut)'}</span>
+            <span>
+              {isSpeakingQuestion
+                ? 'Jeda Video'
+                : activeVideoSrc
+                ? 'Putar Video Pewawancara'
+                : 'Mulai Bicara'}
+            </span>
           </button>
+
+          {/* Ulangi Video Pertanyaan */}
+          {activeVideoSrc && (
+            <button
+              onClick={handleReplayVoice}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-slate-900 border-slate-800 text-slate-200 hover:bg-slate-800 hover:text-white transition-colors"
+              title="Ulangi video pertanyaan dari awal"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-sky-400" />
+              <span>Ulangi Video</span>
+            </button>
+          )}
 
           {/* Mute Interviewer Audio */}
           <button

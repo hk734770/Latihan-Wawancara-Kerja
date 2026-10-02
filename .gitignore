@@ -8,3 +8,4 @@ coverage/
 !.env.example
 *.bak.sql
 import-db.js
+/interview-1.mp4

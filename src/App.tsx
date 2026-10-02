@@ -160,6 +160,7 @@ export default function App() {
           <section className="lg:col-span-8 flex flex-col">
             {/* Recruiter Video Stream Box */}
             <RecruiterVideoBox
+              videoUrl={currentQuestion.videoUrl}
               questionText={currentQuestion.questionText}
               interviewerName={currentQuestion.interviewerName}
               interviewerTitle={currentQuestion.interviewerTitle}

@@ -7,6 +7,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     totalQuestions: 20,
     role: 'Lead Product Manager',
     code: '#PM-892',
+    videoUrl: '/interview-1.mp4',
     questionText:
       'Ceritakan pengalaman paling menantang ketika Anda harus menyelaraskan prioritas roadmap produk antara permintaan tim sales yang mendesak dan keterbatasan teknis engineering. Bagaimana Anda menentukan keputusan akhirnya?',
     category: 'Product Strategy',

@@ -31,6 +31,7 @@ export interface InterviewQuestion {
   totalQuestions: number;
   role: string;
   code: string; // e.g. "#PM-892"
+  videoUrl?: string;
   questionText: string;
   category: 'Behavioral' | 'Leadership' | 'Technical' | 'Product Strategy';
   interviewerName: string;
